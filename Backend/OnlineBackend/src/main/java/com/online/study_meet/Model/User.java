@@ -2,9 +2,9 @@ package com.online.study_meet.Model;
 
 
 import jakarta.persistence.*;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+
 
 @Getter
 @Setter
@@ -18,6 +18,6 @@ public class User {
     private String username;
     @Column(nullable = false)
     private String password;
-    @Column(unique=true, nullable = false)
+    @Column(unique = true, nullable = false)
     private String email;
 }
