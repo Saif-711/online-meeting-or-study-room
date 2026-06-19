@@ -1,9 +1,9 @@
 package com.online.study_meet.Service;
 
 
-import com.online.study_meet.DTO.AuthResponse;
-import com.online.study_meet.DTO.LoginRequest;
-import com.online.study_meet.DTO.RegisterRequest;
+import com.online.study_meet.DTO.Auth.AuthResponse;
+import com.online.study_meet.DTO.Auth.LoginRequest;
+import com.online.study_meet.DTO.Auth.RegisterRequest;
 import com.online.study_meet.Model.User;
 import com.online.study_meet.Repository.UserRepository;
 import lombok.RequiredArgsConstructor;

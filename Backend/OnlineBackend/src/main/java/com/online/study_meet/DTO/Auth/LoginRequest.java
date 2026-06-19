@@ -1,4 +1,4 @@
-package com.online.study_meet.DTO;
+package com.online.study_meet.DTO.Auth;
 
 import lombok.Data;
 
