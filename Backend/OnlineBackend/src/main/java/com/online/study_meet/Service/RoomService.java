@@ -29,10 +29,27 @@ public class RoomService {
 
         room.setOwner(owner);
 
-        room.getMembers().add(owner); // الآن آمن إذا initialized
+        room.getMembers().add(owner);
 
         Room saved = roomRepository.save(room);
 
+        return new RoomResponse(
+                saved.getId(),
+                saved.getRoomName(),
+                saved.getRoomCode(),
+                saved.getDescription(),
+                saved.getOwner().getUsername(),
+                saved.getMembers().size()
+        );
+    }
+    public RoomResponse joinRoom(String roomCode,User user){
+        Room room = roomRepository.findByRoomCode(roomCode)
+                .orElseThrow(() -> new RuntimeException("Room not found"));
+        if(room.getMembers().contains(user)){
+            throw new RuntimeException("User Already in the Room");
+        }
+        room.getMembers().add(user);
+        Room saved=roomRepository.save(room);
         return new RoomResponse(
                 saved.getId(),
                 saved.getRoomName(),
