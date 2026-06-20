@@ -39,4 +39,11 @@ public class RoomController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
+    @PostMapping("/{roomCode}/leave")
+    public ResponseEntity<?>leaveRoom(@PathVariable String roomCode,Authentication auth){
+        String username = auth.getName();
+        roomService.leaveRoom(roomCode,username);
+        return ResponseEntity.status(HttpStatus.OK).body("Left the room successfully");
+    }
+
 }

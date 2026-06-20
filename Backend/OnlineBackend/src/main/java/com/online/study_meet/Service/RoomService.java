@@ -7,6 +7,7 @@ import com.online.study_meet.DTO.RoomDTO.RoomResponse;
 import com.online.study_meet.Model.Room;
 import com.online.study_meet.Model.User;
 import com.online.study_meet.Repository.RoomRepository;
+import com.online.study_meet.Repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +18,7 @@ import java.util.UUID;
 public class RoomService {
 
     private final RoomRepository roomRepository;
+    private final UserRepository userRepository;
 
     public RoomResponse createRoom(RoomCreateRequest request, User owner) {
 
@@ -59,4 +61,17 @@ public class RoomService {
                 saved.getMembers().size()
         );
     }
+    public String leaveRoom(String roomCode,String username){
+        Room room=roomRepository.findByRoomCode(roomCode)
+                .orElseThrow(()->new RuntimeException("Room not found"));
+        User user=userRepository.findByUsername(username)
+                .orElseThrow(()->new RuntimeException("User not found"));
+        if(!room.getMembers().contains(user)){
+            throw new RuntimeException("User not in the Room");
+        }
+        room.getMembers().remove(user);
+        roomRepository.save(room);
+        return "User left the room successfully";
+    }
+
 }
