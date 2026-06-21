@@ -9,8 +9,9 @@ import com.online.study_meet.Repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -45,5 +46,21 @@ public class MessageService {
                 saved.getSender().getUsername(),
                 saved.getCreatedAt()
         );
+    }
+    public List<MsgRes> getChatHistory(String roomCode,String username){
+        Room room=roomService.findByRoomCode(roomCode)
+                .orElseThrow(()->new RuntimeException("room with code"+roomCode+"not found"));
+        User user=userRepository.findByUsername(username)
+                .orElseThrow(()->new RuntimeException("username :"+username+" not found"));
+        List<Message> messages=messageRepository.findByRoomRoomCodeOrderByCreatedAtAsc(roomCode);
+        List<MsgRes> responseList=new ArrayList<>();
+        responseList=messages.stream()
+                .map(msg ->new MsgRes(
+                        msg.getId(),
+                        msg.getContent(),
+                        msg.getSender().getUsername(),
+                        msg.getCreatedAt()
+                )).toList();
+        return responseList;
     }
 }
