@@ -11,6 +11,7 @@ import com.online.study_meet.Repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -74,4 +75,8 @@ public class RoomService {
         return "User left the room successfully";
     }
 
+
+    public Optional<Room> findByRoomCode(String roomCode) {
+        return roomRepository.findByRoomCode(roomCode);
+    }
 }

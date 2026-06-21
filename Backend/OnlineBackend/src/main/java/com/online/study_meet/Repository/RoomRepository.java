@@ -7,8 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface RoomRepository extends JpaRepository<Room, Long> {
-    List<Room> findByOwnerId(Long ownerId);
-
-    List<Room> findByMembersId(Long userId);
+//    List<Room> findByOwnerId(Long ownerId);
+//    List<Room> findByMembersId(Long userId);
     Optional<Room> findByRoomCode(String roomCode);
 }

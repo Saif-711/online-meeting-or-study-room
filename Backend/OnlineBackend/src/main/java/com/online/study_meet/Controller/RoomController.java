@@ -1,9 +1,11 @@
 package com.online.study_meet.Controller;
 
+import com.online.study_meet.DTO.Message.MsgRes;
 import com.online.study_meet.DTO.RoomDTO.RoomCreateRequest;
 import com.online.study_meet.DTO.RoomDTO.RoomResponse;
 import com.online.study_meet.Model.User;
 import com.online.study_meet.Repository.UserRepository;
+import com.online.study_meet.Service.MessageService;
 import com.online.study_meet.Service.RoomService;
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.Response;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 public class RoomController {
     private final RoomService roomService;
     private final UserRepository userRepository;
+    private final MessageService messageService;
 
     //create Room
     @PostMapping("/create")
