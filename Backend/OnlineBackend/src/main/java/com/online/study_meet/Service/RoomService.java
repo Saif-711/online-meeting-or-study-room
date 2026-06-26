@@ -1,9 +1,9 @@
 package com.online.study_meet.Service;
 
 
-import com.online.study_meet.DTO.Auth.RegisterRequest;
 import com.online.study_meet.DTO.RoomDTO.RoomCreateRequest;
 import com.online.study_meet.DTO.RoomDTO.RoomResponse;
+import com.online.study_meet.Exception.UserNotFoundException;
 import com.online.study_meet.Model.Room;
 import com.online.study_meet.Model.User;
 import com.online.study_meet.Repository.RoomRepository;
@@ -11,6 +11,7 @@ import com.online.study_meet.Repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -78,5 +79,11 @@ public class RoomService {
 
     public Optional<Room> findByRoomCode(String roomCode) {
         return roomRepository.findByRoomCode(roomCode);
+    }
+    public List<Room> findAllByUsername(String username) {
+        userRepository.findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException());
+
+        return roomRepository.findByMembersUsername(username);
     }
 }
