@@ -4,6 +4,7 @@ import com.online.study_meet.DTO.Message.MsgRes;
 import com.online.study_meet.DTO.RoomDTO.MyRoomResponse;
 import com.online.study_meet.DTO.RoomDTO.RoomCreateRequest;
 import com.online.study_meet.DTO.RoomDTO.RoomResponse;
+import com.online.study_meet.Exception.RoomNotFoundException;
 import com.online.study_meet.Exception.UserNotFoundException;
 import com.online.study_meet.Model.Room;
 import com.online.study_meet.Model.User;
@@ -68,6 +69,21 @@ public class RoomController {
                         room.getRoomName()
                 )).toList();
         return ResponseEntity.ok(response);
+    }
+    @GetMapping("/{roomCode}")
+    public ResponseEntity<RoomResponse> getRoomDetails(@PathVariable String roomCode){
+        Room room=roomService.findByRoomCode(roomCode)
+                .orElseThrow(()->new RoomNotFoundException("room not found"));
+         RoomResponse response=new RoomResponse(
+                 room.getId(),
+                 room.getRoomName(),
+                 room.getRoomCode(),
+                 room.getDescription(),
+                 room.getOwner().getUsername(),
+                 room.getMembers().size()
+         );
+         return ResponseEntity.status(HttpStatus.OK).body(response);
+
     }
 
 }

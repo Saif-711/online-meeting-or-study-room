@@ -76,10 +76,10 @@ public class RoomService {
         return "User left the room successfully";
     }
 
-
     public Optional<Room> findByRoomCode(String roomCode) {
         return roomRepository.findByRoomCode(roomCode);
     }
+
     public List<Room> findAllByUsername(String username) {
         userRepository.findByUsername(username)
                 .orElseThrow(() -> new UserNotFoundException());
