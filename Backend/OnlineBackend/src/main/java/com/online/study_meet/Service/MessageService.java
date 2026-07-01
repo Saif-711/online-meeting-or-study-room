@@ -1,6 +1,7 @@
 package com.online.study_meet.Service;
 
 import com.online.study_meet.DTO.Message.MsgRes;
+import com.online.study_meet.Exception.NotMemberException;
 import com.online.study_meet.Model.Message;
 import com.online.study_meet.Model.Room;
 import com.online.study_meet.Model.User;
@@ -52,6 +53,11 @@ public class MessageService {
                 .orElseThrow(()->new RuntimeException("room with code"+roomCode+"not found"));
         User user=userRepository.findByUsername(username)
                 .orElseThrow(()->new RuntimeException("username :"+username+" not found"));
+        boolean isMember=room.getMembers().stream()
+                .anyMatch(member->member.getUsername().equals(username));
+        if(!isMember){
+            throw new NotMemberException("Not Member");
+        }
         List<Message> messages=messageRepository.findByRoomRoomCodeOrderByCreatedAtAsc(roomCode);
         List<MsgRes> responseList=new ArrayList<>();
         responseList=messages.stream()

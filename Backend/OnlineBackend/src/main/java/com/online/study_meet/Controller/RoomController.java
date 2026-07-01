@@ -70,7 +70,7 @@ public class RoomController {
                 )).toList();
         return ResponseEntity.ok(response);
     }
-    @GetMapping("/{roomCode}")
+    @GetMapping("/{roomCode}") 
     public ResponseEntity<RoomResponse> getRoomDetails(@PathVariable String roomCode){
         Room room=roomService.findByRoomCode(roomCode)
                 .orElseThrow(()->new RoomNotFoundException("room not found"));
