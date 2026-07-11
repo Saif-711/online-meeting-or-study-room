@@ -1,5 +1,12 @@
+import AppRoutes from "./routes/AppRoutes";
+import { AuthProvider } from "./context/AuthProviders";
+
 function App() {
-  return <h1>Online Study Meeting Rooms</h1>;
+  return (
+     <AuthProvider>
+      <AppRoutes />
+    </AuthProvider>
+  );
 }
 
 export default App;

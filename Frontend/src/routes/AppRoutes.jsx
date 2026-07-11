@@ -17,7 +17,7 @@ const AppRoutes = () => {
                 {/** Protected Routes */}
                 <Route element ={<ProtectedRoute/>}>
                     <Route path="/dashboard" element ={<Dashboard/>} />
-                    <Route path="/room/ :id" element ={<Room/>} />
+                    <Route path="/room/:id" element ={<Room/>} />
                     <Route path="/create-room" element ={<CreateRoom/>} />
                 </Route>
                 <Route path="*" element ={<NotFound/>} />
@@ -25,3 +25,4 @@ const AppRoutes = () => {
         </BrowserRouter>
     )
 }
+export default AppRoutes;
