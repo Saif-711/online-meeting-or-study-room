@@ -1,71 +1,61 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthProviders";
+import {useState} from "react";
+import {login} from "../services/authService";
+export default function Login (){
 
-const Login = () => {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const navigate = useNavigate();
-  const { login } = useAuth();
 
-  function handleLogin() {
-    if (username && password) {
-      login("dummy-token");
-      navigate("/dashboard");
+  const [email,setEmail] = useState("");
+  const [password,setPassword] = useState("");
+  const [error,setError] = useState("");
+  const [loading,setLoading] = useState(false);
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+    try{
+      const data = await login(email,password);
+      localStorage.setItem("token",data.token);
+      //test
+      console.log(data);
+      console.log("Login successful");
+      //
+      
+      
+    }catch(err){
+      console.log(err.response);
+      setError(err.response.data.message || "Login failed");
+    }finally{
+      setLoading(false);
     }
-  }
-
+  };
   return (
-    <div className="container d-flex justify-content-center align-items-center vh-100">
-      <div className="card shadow p-4" style={{ width: "350px" }}>
-        <h3 className="text-center mb-4">Login</h3>
-
-        {/* Username */}
-        <div className="mb-3">
-          <label className="form-label">Username</label>
-          <input
-            type="text"
-            className="form-control"
-            placeholder="Enter username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-          />
-        </div>
-
-        {/* Password */}
-        <div className="mb-3">
-          <label className="form-label">Password</label>
-          <input
-            type="password"
-            className="form-control"
-            placeholder="Enter password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </div>
-
-        {/* Button */}
-        <button
-          className="btn btn-primary w-100"
-          onClick={handleLogin}
-        >
-          Login
-        </button>
-
-        {/* Optional link */}
-        <p className="text-center mt-3 mb-0">
-          Don't have an account?{" "}
-          <span
-            className="text-primary"
-            style={{ cursor: "pointer" }}
-            onClick={() => navigate("/register")}
-          >
-            Register
-          </span>
-        </p>
+   <div className="login-container">
+    <h2>Login</h2>
+    
+    <form onSubmit={handleLogin}>
+      <div>
+        <label>Email:</label>
+        <br />
+        <input type="email" placeholder="Enter your email" 
+        value={email} onChange={(e)=>setEmail(e.target.value)} required/>
       </div>
-    </div>
+      <br />
+            <div>
+        <label>Password:</label>
+        <br />
+        <input type="password" placeholder="Enter your password" 
+        value={password} onChange={(e)=>setPassword(e.target.value)} required/>
+      </div>
+      <br />
+      {error && (
+          <p style={{color:"red"}}>{error}</p>
+      )
+      }
+      <button type="submit" disabled={loading}>
+        {loading ? "Logging in..." : "Login"}
+      </button>
+    </form>
+   </div>
   );
-};
+}
 
-export default Login;

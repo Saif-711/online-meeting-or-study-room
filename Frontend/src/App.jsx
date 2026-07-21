@@ -1,12 +1,12 @@
-import AppRoutes from "./routes/AppRoutes";
-import { AuthProvider } from "./context/AuthProviders";
-
+import Login from "./pages/Login";
 function App() {
   return (
-     <AuthProvider>
-      <AppRoutes />
-    </AuthProvider>
+    <>
+    <h1>Welcome to the App</h1>
+        <Login />;
+        </>
   );
+
 }
 
 export default App;
