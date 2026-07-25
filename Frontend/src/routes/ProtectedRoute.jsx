@@ -1,4 +1,11 @@
-import React from "react";
-import { ProtectedRoute as ProtectedRouteComponent } from "../context/AuthProviders";
+import { Navigate } from "react-router-dom";
 
-export default ProtectedRouteComponent;
+export default function ProtectedRoute({ children }) {
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return children;
+}
