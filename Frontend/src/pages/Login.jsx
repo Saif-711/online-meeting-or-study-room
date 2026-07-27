@@ -18,16 +18,16 @@ export default function Login (){
     setError("");
     try{
       const data = await loginApi(email,password);
+      console.log("Login response:", data);
       login(data.token);
-      // console.log(data);
-      // console.log("Login successful");
+      console.log("Token stored:", localStorage.getItem("token"));
       navigate("/dashboard");
-   
-      
-      
     }catch(err){
       console.log(err.response);
-      setError(err.response.data.message || "Login failed");
+      const errorMessage = err.response?.data 
+        ? (typeof err.response.data === 'string' ? err.response.data : err.response.data.message)
+        : err.message;
+      setError(errorMessage || "Login failed");
     }finally{
       setLoading(false);
     }

@@ -12,7 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.service.annotation.PostExchange;
 
-@CrossOrigin("http://localhost:3000, http://localhost:3001,http://localhost:3002")
+@CrossOrigin("http://localhost:3000")
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {

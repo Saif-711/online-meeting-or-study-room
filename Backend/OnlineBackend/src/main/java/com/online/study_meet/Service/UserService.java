@@ -42,9 +42,9 @@ public class UserService {
 
     public AuthResponse login(LoginRequest request){
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new RuntimeException("Invalid Email or password"));
         if(!passwordEncoder.matches(request.getPassword(),user.getPassword())){
-            throw new RuntimeException("Invalid password");
+            throw new RuntimeException("Invalid Email or password");
         }
         String token =jwtService.generateToken(user.getUsername());
         return AuthResponse.builder()
