@@ -1,0 +1,48 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: study-mysql
+    environment:
+      MYSQL_DATABASE: study_online_db
+      MYSQL_USER: study_user
+      MYSQL_PASSWORD: study_password
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+    healthcheck:
+      test:
+        ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    image: study-online-backend:latest
+    container_name: study-backend
+    ports:
+      - "8088:8088"
+
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/study_online_db
+      SPRING_DATASOURCE_USERNAME: study_user
+      SPRING_DATASOURCE_PASSWORD: study_password
+
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: study-frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+
+volumes:
+  mysql_data:
