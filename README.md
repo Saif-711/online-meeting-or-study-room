@@ -6,61 +6,148 @@ A full-stack application for creating study/meeting rooms, joining with a room c
 
 | Layer | Technology |
 |-------|------------|
-| Backend | Spring Boot 4.1, Java 17+ |
+| Backend | Spring Boot, Java 17+ |
 | Database | MySQL (`study_online_db`) |
 | Security | Spring Security + JWT |
 | Real-time | WebSocket (STOMP + SockJS) |
 | API Docs | Swagger UI (`/swagger-ui.html`) |
-| Frontend | Basic HTML + SockJS/STOMP (`Frontend/chat.html`) |
+| Frontend | React + Vite (`Frontend/src/`) |
 
 ## Project Structure
 
 ```
 Online_Study_MeetingRooms/
-├── Backend/OnlineBackend/     # Spring Boot REST API
-├── Frontend/chat.html         # Simple WebSocket chat demo
+├── Backend/OnlineBackend/
+│   └── src/main/java/com/online/study_meet/
+│       ├── Controller/          # REST + WebSocket controllers
+│       ├── WebSocket/           # WebSocket config + JWT interceptor
+│       ├── Service/             # Business logic
+│       └── DTO/Message/         # Message DTOs
+├── Frontend/
+│   └── src/
+│       ├── pages/               # Login, Dashboard, Room, etc.
+│       └── services/
+│           ├── messageService.jsx    # HTTP: chat history
+│           └── websocketService.jsx  # WebSocket: live messaging
 └── README.md
 ```
+
+---
+
+## WebSocket Implementation (What Was Done)
+
+Previously, the **React frontend used HTTP only** for messaging (`POST /api/messages/.../send`), even though the backend had WebSocket set up. Messages were not real-time — users had to refresh the page to see new messages.
+
+### Problem
+
+| Before | Issue |
+|--------|-------|
+| Frontend sends via HTTP | No real-time updates |
+| Backend WebSocket existed | Not connected from React |
+| Global topic `/topic/messages` | All rooms shared one channel |
+| WebSocket had no JWT auth | Sender showed as "Anonymous" |
+| WebSocket did not save to DB | Messages lost on refresh |
+
+### Solution
+
+WebSocket was wired up end-to-end: React client, room-scoped topics, JWT auth, and DB persistence.
+
+#### Frontend changes
+
+| File | What it does |
+|------|--------------|
+| `Frontend/src/services/websocketService.jsx` | **New file.** Creates a STOMP client over SockJS. Connects to `/ws` with JWT, subscribes to `/topic/room/{roomCode}`, sends to `/app/chat.send`. |
+| `Frontend/src/pages/Room.jsx` | Loads chat history via HTTP on mount, then connects WebSocket for live send/receive. Deduplicates messages by `id`. |
+| `Frontend/vite.config.js` | Added `global: "globalThis"` so `sockjs-client` works in Vite. |
+
+#### Backend changes
+
+| File | What it does |
+|------|--------------|
+| `ChatController.java` | Receives WebSocket messages, saves them via `MessageService`, broadcasts to `/topic/room/{roomCode}`. |
+| `ChatSendRequest.java` | **New DTO.** Payload: `{ "roomCode": "...", "content": "..." }`. |
+| `WebSocketAuthInterceptor.java` | **New file.** Reads JWT from STOMP `CONNECT` headers and sets the authenticated user. |
+| `WebSocketConfig.java` | Registers the JWT interceptor on the inbound channel. |
+
+### How messaging works now
+
+```
+1. User opens a room
+   └── HTTP GET /api/messages/{roomCode}/messages  →  load past messages
+
+2. WebSocket connects
+   └── SockJS → http://localhost:8088/ws
+   └── Header: Authorization: Bearer <jwt-token>
+   └── Subscribe: /topic/room/{roomCode}
+
+3. User sends a message
+   └── Publish to: /app/chat.send
+   └── Body: { "roomCode": "abc-123", "content": "Hello!" }
+
+4. Backend receives it
+   └── Validates JWT → gets username
+   └── Saves message to MySQL
+   └── Broadcasts to /topic/room/{roomCode}
+
+5. All users in that room see the message instantly
+```
+
+### WebSocket API
+
+| Type | Path | Description |
+|------|------|-------------|
+| Connect | `/ws` | SockJS/STOMP handshake (pass JWT in `Authorization` header) |
+| Send | `/app/chat.send` | Publish a message `{ roomCode, content }` |
+| Subscribe | `/topic/room/{roomCode}` | Receive messages for a specific room |
+
+**Send payload example:**
+
+```json
+{
+  "roomCode": "abc-123-uuid",
+  "content": "Hello everyone!"
+}
+```
+
+**Received message example:**
+
+```json
+{
+  "id": 1,
+  "content": "Hello everyone!",
+  "senderUsername": "john",
+  "createdAt": "2026-08-22T14:30:00"
+}
+```
+
+### Dependencies used (already in package.json)
+
+- `@stomp/stompjs` — STOMP protocol client
+- `sockjs-client` — WebSocket fallback transport
+
+---
 
 ## Progress So Far
 
 ### Done
 
-- **User authentication**
-  - Register and login
-  - JWT token returned on login
-  - Protected routes for all `/api/**` except auth
-
-- **Room management**
-  - Create a room (owner is added as a member)
-  - Join a room by `roomCode`
-  - Leave a room
-  - List current user's rooms (`GET /api/rooms/mine`)
-
-- **Messaging (REST)**
-  - Send a message to a room
-  - Get chat history for a room
-
-- **WebSocket chat**
-  - STOMP endpoint at `/ws`
-  - Send messages via `/app/chat.send`
-  - Subscribe to `/topic/messages`
-
-- **Database models**
-  - `User`, `Room`, `Message`
-  - Many-to-many: users ↔ room members (`room_members`)
-  - Room owner, optional room password field
-
-- **Swagger**
-  - API documentation available at `http://localhost:8088/swagger-ui.html`
+- User authentication (register, login, JWT)
+- Room management (create, join, leave, list mine)
+- Messaging via REST (send + get history)
+- **React frontend with real-time WebSocket chat**
+- **Room-scoped WebSocket topics**
+- **JWT authentication on WebSocket connect**
+- **Messages persisted to DB via WebSocket**
+- Swagger API docs
 
 ### In Progress / Next Steps
 
-- Full frontend UI (login, room list, join/create room)
 - Room password validation on join
 - Get room details / list members
 - Update or delete room (owner only)
-- Room-scoped WebSocket topics (messages per room, not global)
+- Leave room API call from frontend
+- Auto-scroll chat to latest message
+- Connection status indicator (connected / disconnected)
 
 ---
 
@@ -90,28 +177,14 @@ Authorization: Bearer <jwt-token>
 | POST | `/api/rooms/{roomCode}/leave` | Leave a room |
 | GET | `/api/rooms/mine` | List rooms for the logged-in user |
 
-**Example — GET `/api/rooms/mine` response:**
-
-```json
-[
-  { "roomCode": "abc-123-uuid", "roomName": "Math Study Group" }
-]
-```
-
 ### Messages — `/api/messages`
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| POST | `/api/messages/{roomCode}/send` | Send a message |
-| GET | `/api/messages/{roomCode}/messages` | Get chat history |
+| POST | `/api/messages/{roomCode}/send` | Send a message (REST — still available) |
+| GET | `/api/messages/{roomCode}/messages` | Get chat history (used on room load) |
 
-### WebSocket
-
-| Type | Path | Description |
-|------|------|-------------|
-| Connect | `/ws` | SockJS/STOMP handshake |
-| Send | `/app/chat.send` | Publish a chat message |
-| Subscribe | `/topic/messages` | Receive broadcast messages |
+> **Note:** The React app uses **WebSocket** to send messages and **HTTP** only to load history when entering a room.
 
 ---
 
@@ -146,18 +219,22 @@ mvn spring-boot:run
 
 Server runs on **port 8088**.
 
-### Frontend (WebSocket demo)
+### Frontend
 
-Open `Frontend/chat.html` in a browser (or serve it locally). It connects to `http://localhost:8088/ws`.
+```bash
+cd Frontend
+npm install
+npm run dev
+```
 
-### Quick test flow
+App runs on **http://localhost:3000**.
 
-1. `POST /api/auth/register` — create a user
-2. `POST /api/auth/login` — copy the JWT token
-3. `POST /api/rooms/create` — create a room (with `Authorization: Bearer <token>`)
-4. `GET /api/rooms/mine` — see your rooms
-5. `POST /api/rooms/{roomCode}/join` — join with another user
-6. `POST /api/messages/{roomCode}/send` — send a message
+### Test real-time chat
+
+1. Register two users (e.g. in two browser windows or incognito tabs).
+2. Log in as User A → create a room → note the room code.
+3. Log in as User B → join the room with that code.
+4. Both users open the room — messages appear instantly without refresh.
 
 ---
 

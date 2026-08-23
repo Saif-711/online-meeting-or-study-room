@@ -4,6 +4,8 @@ import Register from "./pages/Register";
 import { Routes, Route } from "react-router-dom";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import CreateRoom from "./pages/CreateRoom";
+import JoinRoom from "./pages/JoinRoom";
+import Room from "./pages/Room";
 function App() {
   return (
     <Routes>
@@ -16,9 +18,22 @@ function App() {
         <Dashboard />
         </ProtectedRoute>
       } />
-      <Route path="/create-room" element={
+      <Route path="/create-room" 
+      element={
         <ProtectedRoute>
           <CreateRoom />
+        </ProtectedRoute>
+      } />
+      <Route path="/join-room" 
+      element={
+        <ProtectedRoute>
+          <JoinRoom />
+        </ProtectedRoute>
+      } />
+      <Route path="/room/:roomCode" 
+      element={
+        <ProtectedRoute>
+          <Room />
         </ProtectedRoute>
       } />
     </Routes>
