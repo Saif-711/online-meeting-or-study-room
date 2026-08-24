@@ -5,13 +5,14 @@ const WS_URL = "http://localhost:8088/ws";
 
 export const createChatClient = (token, roomCode, onMessage) => {
     const client = new Client({
-        webSocketFactory: () => new SockJS(WS_URL),
+        webSocketFactory: () => new SockJS(WS_URL),//here interceptor in backend will check the token and if valid it will allow the connection
         connectHeaders: {
             Authorization: `Bearer ${token}`,
         },
         reconnectDelay: 5000,
         onConnect: () => {
             client.subscribe(`/topic/room/${roomCode}`, (message) => {
+                console.log("Received message:", message.body);
                 onMessage(JSON.parse(message.body));
             });
         },
@@ -21,6 +22,8 @@ export const createChatClient = (token, roomCode, onMessage) => {
     });
 
     client.activate();
+
+ 
 
     return {
         sendMessage: (content) => {

@@ -9,6 +9,7 @@ import com.online.study_meet.Repository.MessageRepository;
 import com.online.study_meet.Repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -21,6 +22,7 @@ public class MessageService {
     private final UserRepository userRepository;
     private final RoomService roomService;
 
+    @Transactional
     public MsgRes sendMessage(String content,
                               String roomCode,
                               String senderUsername) {

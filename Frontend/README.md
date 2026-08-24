@@ -1,18 +1,34 @@
-# React + Vite
+# Online Study Meeting Rooms — Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+React + Vite app for the study/meeting rooms platform.
 
-Currently, two official plugins are available:
+**Start here for step-by-step MVP build instructions:** [FRONTEND_MVP_ROADMAP.md](./FRONTEND_MVP_ROADMAP.md)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+That roadmap traces Phase 0 through Phase 8 — what to build, which backend endpoint to connect, and how to verify each step. No code inside; instructions only.
 
-## React Compiler
+## Quick start
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+```bash
+npm install
+npm run dev
+```
 
-Note: This will impact Vite dev & build performances.
+App runs at **http://localhost:3000**. Backend must be running at **http://localhost:8088**.
 
-## Expanding the Oxlint configuration
+## Scripts
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start dev server (port 3000) |
+| `npm run build` | Production build |
+| `npm run preview` | Preview production build |
+
+## Tech stack
+
+- React 18
+- Vite
+- React Router
+- Axios (REST)
+- STOMP + SockJS (WebSocket chat)
+
+See the root [README.md](../README.md) for backend setup and full API docs.
