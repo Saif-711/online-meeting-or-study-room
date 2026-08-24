@@ -3,6 +3,7 @@ import { AuthContext } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { getMyRooms } from '../services/roomService';
+
 export default function Dashboard() {
     const navigate = useNavigate();
     const { logout } = useContext(AuthContext);
@@ -30,35 +31,76 @@ export default function Dashboard() {
         fetchRooms();
     }, []);
 
-
-
      return (
-        <div className="dashboard-container">
-            <div className="dashboard-header">
-                <h1>Welcome to the Dashboard</h1>
-                <button onClick={handleLogout} className="logout-btn">Logout</button>
+        <div className="container py-5">
+            <div className="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 className="fw-bold text-primary">
+                        <i className="bi bi-grid-3x3-gap me-2"></i>Dashboard
+                    </h1>
+                    <p className="text-muted mb-0">Welcome back! Manage your study rooms here.</p>
+                </div>
+                <button onClick={handleLogout} className="btn btn-outline-danger">
+                    <i className="bi bi-box-arrow-right me-2"></i>Logout
+                </button>
             </div>
- 
-            <div className="dashboard-actions">
-                <button onClick={() => navigate("/create-room")} className="create-room-btn">Create Room</button>
-                <button onClick={() => navigate("/join-room")} className="join-room-btn">Join Room</button>
+
+            <div className="row mb-4">
+                <div className="col-md-6">
+                    <button onClick={() => navigate("/create-room")} className="btn btn-primary btn-lg w-100">
+                        <i className="bi bi-plus-circle me-2"></i>Create Room
+                    </button>
+                </div>
+                <div className="col-md-6">
+                    <button onClick={() => navigate("/join-room")} className="btn btn-success btn-lg w-100">
+                        <i className="bi bi-box-arrow-in-right me-2"></i>Join Room
+                    </button>
+                </div>
             </div>
- 
+
             {loading ? (
-                <p>Loading rooms...</p>
+                <div className="text-center py-5">
+                    <div className="spinner-border text-primary" role="status">
+                        <span className="visually-hidden">Loading...</span>
+                    </div>
+                    <p className="mt-3 text-muted">Loading rooms...</p>
+                </div>
             ) : rooms.length === 0 ? (
-                <p>No rooms yet. Create or join a room to get started!</p>
+                <div className="card shadow-sm">
+                    <div className="card-body text-center py-5">
+                        <i className="bi bi-inbox fs-1 text-muted mb-3"></i>
+                        <h3 className="text-muted">No rooms yet</h3>
+                        <p className="text-muted">Create or join a room to get started!</p>
+                    </div>
+                </div>
             ) : (
-                <div className="rooms-list">
-                    <h2>Your Rooms</h2>
-                    <div className="rooms-grid">
+                <div>
+                    <h2 className="mb-4">
+                        <i className="bi bi-door-open me-2"></i>Your Rooms
+                    </h2>
+                    <div className="row">
                         {rooms.map((room) => (
-                            <div key={room.roomCode} className="room-card">
-                                <h3>{room.roomName}</h3>
-                                <p>Room Code: {room.roomCode}</p>
-                                <button onClick={() => navigate(`/room/${room.roomCode}`)} className="enter-room-btn">
-                                    Enter Room
-                                </button>
+                            <div key={room.roomCode} className="col-md-6 col-lg-4 mb-4">
+                                <div className="card shadow-sm h-100">
+                                    <div className="card-body">
+                                        <h5 className="card-title fw-bold">
+                                            <i className="bi bi-door-closed me-2 text-primary"></i>
+                                            {room.roomName}
+                                        </h5>
+                                        <p className="card-text text-muted mb-3">
+                                            <small>
+                                                <i className="bi bi-hash me-1"></i>
+                                                Code: {room.roomCode}
+                                            </small>
+                                        </p>
+                                        <button 
+                                            onClick={() => navigate(`/room/${room.roomCode}`)} 
+                                            className="btn btn-primary w-100"
+                                        >
+                                            <i className="bi bi-arrow-right-circle me-2"></i>Enter Room
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         ))}
                     </div>

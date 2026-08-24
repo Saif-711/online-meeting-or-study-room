@@ -30,3 +30,12 @@ export const joinRoom = async (roomCode, password, token)=>{
     });
     return response.data;
 }
+
+export const getRoomDetails = async (roomCode, token)=>{
+    const response = await axios.get(`${API_URL}/${roomCode}`,{
+        headers:{
+            Authorization: `Bearer ${token}`
+        }
+    });
+    return response.data;
+}
