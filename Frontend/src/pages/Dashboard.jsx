@@ -6,7 +6,7 @@ import { getMyRooms } from '../services/roomService';
 
 export default function Dashboard() {
     const navigate = useNavigate();
-    const { logout } = useContext(AuthContext);
+    const { logout, username } = useContext(AuthContext);
     const [rooms, setRooms] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -78,13 +78,30 @@ export default function Dashboard() {
                     <h2 className="mb-4">
                         <i className="bi bi-door-open me-2"></i>Your Rooms
                     </h2>
+                    <p className="text-muted mb-3">
+                        <span className="badge bg-danger me-2">Owner</span>
+                        Rooms you created
+                        <span className="badge bg-primary ms-3 me-2">Member</span>
+                        Rooms you joined
+                    </p>
                     <div className="row">
-                        {rooms.map((room) => (
+                        {rooms.map((room) => {
+                            const isOwner =
+                                room.isOwner === true ||
+                                room.role === "OWNER" ||
+                                (username && room.ownerUsername === username);
+                            return (
                             <div key={room.roomCode} className="col-md-6 col-lg-4 mb-4">
-                                <div className="card shadow-sm h-100">
+                                <div className={`card shadow-sm h-100 ${isOwner ? "border-danger" : "border-primary"}`}
+                                     style={{ borderWidth: "2px" }}>
+                                    <div className={`card-header ${isOwner ? "bg-danger text-white" : "bg-primary text-white"}`}>
+                                        <span className="badge bg-light text-dark">
+                                            {isOwner ? "Owner" : "Member"}
+                                        </span>
+                                    </div>
                                     <div className="card-body">
-                                        <h5 className="card-title fw-bold">
-                                            <i className="bi bi-door-closed me-2 text-primary"></i>
+                                        <h5 className={`card-title fw-bold ${isOwner ? "text-danger" : "text-primary"}`}>
+                                            <i className={`bi bi-door-closed me-2 ${isOwner ? "text-danger" : "text-primary"}`}></i>
                                             {room.roomName}
                                         </h5>
                                         <p className="card-text text-muted mb-3">
@@ -95,14 +112,15 @@ export default function Dashboard() {
                                         </p>
                                         <button 
                                             onClick={() => navigate(`/room/${room.roomCode}`)} 
-                                            className="btn btn-primary w-100"
+                                            className={`btn w-100 ${isOwner ? "btn-danger" : "btn-primary"}`}
                                         >
                                             <i className="bi bi-arrow-right-circle me-2"></i>Enter Room
                                         </button>
                                     </div>
                                 </div>
                             </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 </div>
             )}

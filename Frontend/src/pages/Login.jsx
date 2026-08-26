@@ -19,7 +19,7 @@ export default function Login (){
     try{
       const data = await loginApi(email,password);
       console.log("Login response:", data);
-      login(data.token);
+      login(data.token, data.username);
       console.log("Token stored:", localStorage.getItem("token"));
       navigate("/dashboard");
     }catch(err){

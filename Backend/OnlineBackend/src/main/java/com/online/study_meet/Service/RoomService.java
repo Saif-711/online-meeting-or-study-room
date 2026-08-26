@@ -1,6 +1,7 @@
 package com.online.study_meet.Service;
 
 
+import com.online.study_meet.DTO.RoomDTO.MyRoomResponse;
 import com.online.study_meet.DTO.RoomDTO.RoomCreateRequest;
 import com.online.study_meet.DTO.RoomDTO.RoomResponse;
 import com.online.study_meet.Exception.UserNotFoundException;
@@ -10,8 +11,10 @@ import com.online.study_meet.Repository.RoomRepository;
 import com.online.study_meet.Repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -85,5 +88,25 @@ public class RoomService {
                 .orElseThrow(() -> new UserNotFoundException());
 
         return roomRepository.findByMembersUsername(username);
+    }
+
+    @Transactional(readOnly = true)
+    public List<MyRoomResponse> getMyRooms(String username) {
+        User currentUser = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
+
+        return roomRepository.findByMembersUsername(username).stream()
+                .map(room -> {
+                    boolean isOwner = room.getOwner() != null
+                            && Objects.equals(room.getOwner().getId(), currentUser.getId());
+                    return new MyRoomResponse(
+                            room.getRoomCode(),
+                            room.getRoomName(),
+                            room.getOwner() != null ? room.getOwner().getUsername() : null,
+                            isOwner ? "OWNER" : "MEMBER",
+                            isOwner
+                    );
+                })
+                .toList();
     }
 }

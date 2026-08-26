@@ -60,16 +60,7 @@ public class RoomController {
 
     @GetMapping("/mine")
     public ResponseEntity<List<MyRoomResponse>> fetchRooms(Authentication auth){
-        //return room code,name
-        String username=auth.getName();
-        List<Room> roomList=roomService.findAllByUsername(username);
-        List<MyRoomResponse> response;
-        response=roomList.stream()
-                .map(room->new MyRoomResponse(
-                        room.getRoomCode(),
-                        room.getRoomName()
-                )).toList();
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(roomService.getMyRooms(auth.getName()));
     }
     @GetMapping("/{roomCode}") 
     public ResponseEntity<RoomResponse> getRoomDetails(@PathVariable String roomCode){
