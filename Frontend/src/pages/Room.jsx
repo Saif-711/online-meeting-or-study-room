@@ -2,7 +2,7 @@ import { useContext, useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import { getChatHistory } from "../services/messageService";
-import { getRoomDetails } from "../services/roomService";
+import { getRoomDetails,leaveRoom } from "../services/roomService";
 import { createChatClient } from "../services/websocketService";
 
 export default function Room() {
@@ -66,6 +66,7 @@ export default function Room() {
     const handleLeaveRoom = async () => {
         try {
             const token = localStorage.getItem("token");
+            await leaveRoom(token, roomCode); // Call the leaveRoom service
             // TODO: Implement leave room API call
             navigate("/dashboard");
         } catch (error) {

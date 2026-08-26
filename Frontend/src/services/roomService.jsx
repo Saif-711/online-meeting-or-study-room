@@ -39,3 +39,12 @@ export const getRoomDetails = async (roomCode, token)=>{
     });
     return response.data;
 }
+
+export const leaveRoom = async(token,roomCode) =>{
+    const response = await axios.post(`${API_URL}/${roomCode}/leave`,{},{
+        headers:{
+            Authorization: `Bearer ${token}`
+        }
+ });
+    return response.data;
+}
