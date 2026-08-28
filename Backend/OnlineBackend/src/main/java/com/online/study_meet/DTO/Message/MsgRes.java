@@ -14,4 +14,7 @@ public class MsgRes {
     private String content;
     private String senderUsername;
     private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+    private boolean edited;
+    private boolean deleted;
 }

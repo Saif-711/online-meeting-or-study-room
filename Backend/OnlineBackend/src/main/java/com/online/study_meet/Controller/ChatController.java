@@ -1,6 +1,7 @@
 package com.online.study_meet.Controller;
 
 import com.online.study_meet.DTO.Message.ChatSendRequest;
+import com.online.study_meet.DTO.Message.ChatEvent;
 import com.online.study_meet.DTO.Message.MsgRes;
 import com.online.study_meet.Service.MessageService;
 import lombok.RequiredArgsConstructor;
@@ -45,7 +46,7 @@ public class ChatController {
             
             String topic = "/topic/room/" + request.getRoomCode();
             log.info("Broadcasting message to topic: {}", topic);
-            messagingTemplate.convertAndSend(topic, saved);
+            messagingTemplate.convertAndSend(topic, ChatEvent.message(saved));
             log.info("Message broadcasted successfully");
         } catch (Exception e) {
             log.error("Error processing message: {}", e.getMessage(), e);

@@ -23,6 +23,12 @@ public class Message {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    private LocalDateTime updatedAt;
+
+    private Boolean edited = false;
+
+    private Boolean deleted = false;
+
     @ManyToOne(optional = false)
     @JoinColumn(name = "room_id", nullable = false)
     private Room room;

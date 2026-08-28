@@ -21,7 +21,14 @@ public class GlobalExceptionHandler {
                 .body(ex.getMessage());
     }
     @ExceptionHandler(NotMemberException.class)
-    public ResponseEntity<String>handleNotMember(RoomNotFoundException ex){
+    public ResponseEntity<String>handleNotMember(NotMemberException ex){
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(ex.getMessage());
+    }
+
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<String> handleForbidden(ForbiddenException ex) {
         return ResponseEntity
                 .status(HttpStatus.FORBIDDEN)
                 .body(ex.getMessage());

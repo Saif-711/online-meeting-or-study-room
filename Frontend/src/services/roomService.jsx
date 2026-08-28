@@ -48,3 +48,21 @@ export const leaveRoom = async(token,roomCode) =>{
  });
     return response.data;
 }
+
+export const setMembersCanChat = async (token, roomCode, membersCanChat) => {
+    const response = await axios.patch(`${API_URL}/${roomCode}/chat-lock`, { membersCanChat }, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
+    return response.data;
+}
+
+export const deleteRoom = async (token, roomCode) => {
+    const response = await axios.delete(`${API_URL}/${roomCode}`, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
+    return response.data;
+}

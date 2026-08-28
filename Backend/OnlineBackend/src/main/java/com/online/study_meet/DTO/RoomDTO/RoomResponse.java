@@ -14,4 +14,5 @@ public class RoomResponse {
     private String description;
     private String ownerUsername;
     private int roomCount;
+    private boolean membersCanChat;
 }

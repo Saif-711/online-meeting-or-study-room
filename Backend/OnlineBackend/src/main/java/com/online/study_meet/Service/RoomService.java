@@ -4,9 +4,12 @@ package com.online.study_meet.Service;
 import com.online.study_meet.DTO.RoomDTO.MyRoomResponse;
 import com.online.study_meet.DTO.RoomDTO.RoomCreateRequest;
 import com.online.study_meet.DTO.RoomDTO.RoomResponse;
+import com.online.study_meet.Exception.ForbiddenException;
+import com.online.study_meet.Exception.RoomNotFoundException;
 import com.online.study_meet.Exception.UserNotFoundException;
 import com.online.study_meet.Model.Room;
 import com.online.study_meet.Model.User;
+import com.online.study_meet.Repository.MessageRepository;
 import com.online.study_meet.Repository.RoomRepository;
 import com.online.study_meet.Repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +27,7 @@ public class RoomService {
 
     private final RoomRepository roomRepository;
     private final UserRepository userRepository;
+    private final MessageRepository messageRepository;
 
     public RoomResponse createRoom(RoomCreateRequest request, User owner) {
 
@@ -35,19 +39,13 @@ public class RoomService {
         room.setRoomCode(UUID.randomUUID().toString());
 
         room.setOwner(owner);
+        room.setMembersCanChat(true);
 
         room.getMembers().add(owner);
 
         Room saved = roomRepository.save(room);
 
-        return new RoomResponse(
-                saved.getId(),
-                saved.getRoomName(),
-                saved.getRoomCode(),
-                saved.getDescription(),
-                saved.getOwner().getUsername(),
-                saved.getMembers().size()
-        );
+        return toResponse(saved);
     }
     public RoomResponse joinRoom(String roomCode,User user){
         Room room = roomRepository.findByRoomCode(roomCode)
@@ -57,14 +55,7 @@ public class RoomService {
         }
         room.getMembers().add(user);
         Room saved=roomRepository.save(room);
-        return new RoomResponse(
-                saved.getId(),
-                saved.getRoomName(),
-                saved.getRoomCode(),
-                saved.getDescription(),
-                saved.getOwner().getUsername(),
-                saved.getMembers().size()
-        );
+        return toResponse(saved);
     }
     public String leaveRoom(String roomCode,String username){
         Room room=roomRepository.findByRoomCode(roomCode)
@@ -108,5 +99,52 @@ public class RoomService {
                     );
                 })
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public RoomResponse getRoomDetails(String roomCode) {
+        Room room = roomRepository.findByRoomCode(roomCode)
+                .orElseThrow(() -> new RoomNotFoundException("room not found"));
+        return toResponse(room);
+    }
+
+    @Transactional
+    public RoomResponse setMembersCanChat(String roomCode, String username, boolean membersCanChat) {
+        Room room = requireOwnedRoom(roomCode, username);
+        room.setMembersCanChat(membersCanChat);
+        return toResponse(roomRepository.save(room));
+    }
+
+    @Transactional
+    public void deleteRoom(String roomCode, String username) {
+        Room room = requireOwnedRoom(roomCode, username);
+        messageRepository.deleteAll(messageRepository.findByRoomRoomCodeOrderByCreatedAtAsc(roomCode));
+        room.getMembers().clear();
+        roomRepository.delete(room);
+    }
+
+    public boolean membersAreAllowedToChat(Room room) {
+        return room.getMembersCanChat() == null || room.getMembersCanChat();
+    }
+
+    private Room requireOwnedRoom(String roomCode, String username) {
+        Room room = roomRepository.findByRoomCode(roomCode)
+                .orElseThrow(() -> new RoomNotFoundException("room not found"));
+        if (room.getOwner() == null || !room.getOwner().getUsername().equals(username)) {
+            throw new ForbiddenException("Only the owner can do this");
+        }
+        return room;
+    }
+
+    private RoomResponse toResponse(Room room) {
+        return new RoomResponse(
+                room.getId(),
+                room.getRoomName(),
+                room.getRoomCode(),
+                room.getDescription(),
+                room.getOwner() != null ? room.getOwner().getUsername() : null,
+                room.getMembers() != null ? room.getMembers().size() : 0,
+                membersAreAllowedToChat(room)
+        );
     }
 }

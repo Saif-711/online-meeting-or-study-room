@@ -1,19 +1,16 @@
 package com.online.study_meet.Controller;
 
-import com.online.study_meet.DTO.Message.MsgRes;
 import com.online.study_meet.DTO.RoomDTO.MyRoomResponse;
+import com.online.study_meet.DTO.RoomDTO.RoomChatLockRequest;
 import com.online.study_meet.DTO.RoomDTO.RoomCreateRequest;
 import com.online.study_meet.DTO.RoomDTO.RoomResponse;
-import com.online.study_meet.Exception.RoomNotFoundException;
+import com.online.study_meet.DTO.Message.ChatEvent;
 import com.online.study_meet.Exception.UserNotFoundException;
-import com.online.study_meet.Model.Room;
 import com.online.study_meet.Model.User;
-import com.online.study_meet.Repository.RoomRepository;
 import com.online.study_meet.Repository.UserRepository;
-import com.online.study_meet.Service.MessageService;
+import com.online.study_meet.Service.ChatEventService;
 import com.online.study_meet.Service.RoomService;
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -28,8 +25,7 @@ import java.util.List;
 public class RoomController {
     private final RoomService roomService;
     private final UserRepository userRepository;
-    private final MessageService messageService;
-    private final RoomRepository roomRepository;
+    private final ChatEventService chatEventService;
 
     //create Room
     @PostMapping("/create")
@@ -64,18 +60,24 @@ public class RoomController {
     }
     @GetMapping("/{roomCode}") 
     public ResponseEntity<RoomResponse> getRoomDetails(@PathVariable String roomCode){
-        Room room=roomService.findByRoomCode(roomCode)
-                .orElseThrow(()->new RoomNotFoundException("room not found"));
-         RoomResponse response=new RoomResponse(
-                 room.getId(),
-                 room.getRoomName(),
-                 room.getRoomCode(),
-                 room.getDescription(),
-                 room.getOwner().getUsername(),
-                 room.getMembers().size()
-         );
-         return ResponseEntity.status(HttpStatus.OK).body(response);
+         return ResponseEntity.status(HttpStatus.OK).body(roomService.getRoomDetails(roomCode));
+    }
 
+    @PatchMapping("/{roomCode}/chat-lock")
+    public ResponseEntity<RoomResponse> setChatLock(@PathVariable String roomCode,
+                                                    @RequestBody RoomChatLockRequest request,
+                                                    Authentication auth) {
+        RoomResponse response = roomService.setMembersCanChat(
+                roomCode, auth.getName(), request.isMembersCanChat());
+        chatEventService.send(roomCode, ChatEvent.roomUpdated(response.isMembersCanChat()));
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/{roomCode}")
+    public ResponseEntity<String> deleteRoom(@PathVariable String roomCode, Authentication auth) {
+        roomService.deleteRoom(roomCode, auth.getName());
+        chatEventService.send(roomCode, ChatEvent.roomDeleted());
+        return ResponseEntity.ok("Room deleted");
     }
 
 }

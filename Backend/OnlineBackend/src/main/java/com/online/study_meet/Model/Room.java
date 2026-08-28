@@ -21,6 +21,9 @@ public class Room {
     private String description;
     private String password;
 
+    /** Null or true = members may chat. False = only the owner can send. */
+    private Boolean membersCanChat = true;
+
     @ManyToOne(optional = false)
     @JoinColumn(name = "owner_id", nullable = false)
     private User owner;

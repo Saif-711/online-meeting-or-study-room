@@ -3,17 +3,21 @@ import SockJS from "sockjs-client";
 
 const WS_URL = "http://localhost:8088/ws";
 
-export const createChatClient = (token, roomCode, onMessage) => {
+export const createChatClient = (token, roomCode, onEvent) => {
     const client = new Client({
-        webSocketFactory: () => new SockJS(WS_URL),//here interceptor in backend will check the token and if valid it will allow the connection
+        webSocketFactory: () => new SockJS(WS_URL),
         connectHeaders: {
             Authorization: `Bearer ${token}`,
         },
         reconnectDelay: 5000,
         onConnect: () => {
             client.subscribe(`/topic/room/${roomCode}`, (message) => {
-                console.log("Received message:", message.body);
-                onMessage(JSON.parse(message.body));
+                const payload = JSON.parse(message.body);
+                if (payload && payload.type) {
+                    onEvent(payload);
+                    return;
+                }
+                onEvent({ type: "MESSAGE", message: payload });
             });
         },
         onStompError: (frame) => {
@@ -22,8 +26,6 @@ export const createChatClient = (token, roomCode, onMessage) => {
     });
 
     client.activate();
-
- 
 
     return {
         sendMessage: (content) => {
